@@ -91,6 +91,17 @@ fn seed() -> u64 {
         .unwrap_or(0x5eed)
 }
 
+fn ops_count() -> usize {
+    // Interpreted, a case takes tens of seconds: keep the miri run well under its timeout.
+    if cfg!(miri) { 24 } else { 60 }
+}
+
+/// How often the full-oracle sweep runs. It is the costliest step, so run it less often when
+/// interpreted. The final sweep always runs.
+fn check_every() -> usize {
+    if cfg!(miri) { 24 } else { 8 }
+}
+
 fn injected(i: usize) -> Key {
     Key {
         index: (i % INJECTED) as u32,
@@ -395,7 +406,7 @@ fn run_ops(_seed: u64, ops: &[Op]) {
                 }
             }
         }
-        if i % 8 == 7 {
+        if i % check_every() == check_every() - 1 {
             run.check_everything();
         }
     }
@@ -745,7 +756,7 @@ fn run_honest_ops(seed: u64, ops: &[HonestOp]) {
                 }
             }
         }
-        if i % 8 == 7 {
+        if i % check_every() == check_every() - 1 {
             honest.run.check_everything();
         }
     }
@@ -783,7 +794,7 @@ fn fuzz<O: Clone + Debug>(name: &str, generate: fn(&mut Rng, usize) -> Vec<O>, r
     for case in 0..cases() {
         let case_seed = seed.wrapping_add(case);
         let mut rng = Rng::new(case_seed);
-        let ops = generate(&mut rng, 60);
+        let ops = generate(&mut rng, ops_count());
         if fails(case_seed, &ops, run) {
             let quiet = std::panic::take_hook();
             std::panic::set_hook(Box::new(|_| {}));
