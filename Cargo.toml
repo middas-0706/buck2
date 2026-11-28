@@ -200,7 +200,7 @@ members = [
   "tools/starlark_fmt",
 ]
 exclude = ["superconsole"]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 version = "0.1.0"
