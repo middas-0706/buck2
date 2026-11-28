@@ -14,12 +14,18 @@ _EXCLUDED_PREFIXES = [
     "ide_integrations/visual_studio/assets/",
 ]
 
+def _is_excluded(path: str) -> bool:
+    for prefix in _EXCLUDED_PREFIXES:
+        if path.startswith(prefix):
+            return True
+    return False
+
 def _impl(ctx: AnalysisContext) -> list[Provider]:
     files = {}
 
     parts = ["pub(crate) const DATA: &[crate::BundledFile] = &["]
     for path, art in ctx.attrs.source_listing[SourceListingInfo].sources.items():
-        if any([path.startswith(prefix) for prefix in _EXCLUDED_PREFIXES]):
+        if _is_excluded(path):
             continue
         exec_bit_rel_path = "includes/" + path + "/__exec_bit.txt"
         data_rel_path = "includes/" + path + "/__data"
