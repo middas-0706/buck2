@@ -9,6 +9,20 @@ rust_library(
     ),
     autocargo = {
         "cargo_toml_config": {
+            "dependencies_override": {
+                "dependencies": {
+                    "dupe_derive": {"optional": True},
+                },
+            },
+            "features": {
+                "alloc": [],
+                "default": [
+                    "derive",
+                    "std",
+                ],
+                "derive": ["dep:dupe_derive"],
+                "std": ["alloc"],
+            },
             "package": {
                 "authors": ["Facebook"],
                 "categories": ["rust-patterns"],
@@ -17,7 +31,15 @@ rust_library(
                 "version": "0.9.1",
             },
         },
+        # A dependent gets the default features without naming them, and those
+        # are all of the features Buck builds with.
+        "edge_features": [],
     },
+    features = [
+        "alloc",
+        "derive",
+        "std",
+    ],
     deps = [
         "//buck2/gazebo/dupe_derive:dupe_derive",
     ],

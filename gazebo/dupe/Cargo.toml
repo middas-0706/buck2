@@ -12,7 +12,13 @@ license.workspace = true
 categories = ["rust-patterns"]
 
 [dependencies]
-dupe_derive.workspace = true
+dupe_derive = { workspace = true, optional = true }
+
+[features]
+alloc = []
+default = ["derive", "std"]
+derive = ["dep:dupe_derive"]
+std = ["alloc"]
 
 [lints]
 workspace = true

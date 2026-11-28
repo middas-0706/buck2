@@ -86,3 +86,18 @@ jobs:
       run: bash .github/scripts/report_failure.sh "tests (${{ matrix.name }})" python3 test.py --ci --git --test-only
       shell: bash
       timeout-minutes: 60
+  # `dupe` is `no_std` without its default features, and the other jobs build
+  # it with all of them.
+  dupe-features:
+    name: dupe features
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ./.github/actions/setup_rust_toolchain
+      with:
+        components: clippy
+        targets: thumbv7em-none-eabi
+    - name: Lint and test each feature set
+      run: bash .github/scripts/report_failure.sh "dupe features" bash .github/scripts/dupe_features.sh thumbv7em-none-eabi
+      shell: bash
